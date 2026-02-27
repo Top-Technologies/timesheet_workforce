@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <!-- Module Category -->
+        <record id="module_category_workforce_timesheet" model="ir.module.category">
+            <field name="name">Workforce Timesheet</field>
+            <field name="sequence">25</field>
+        </record>
+
+        <!-- User: inputs data (read + write + create, no delete) -->
+        <record id="group_workforce_user" model="res.groups">
+            <field name="name">User</field>
+            <field name="category_id" ref="module_category_workforce_timesheet"/>
+        </record>
+
+        <!-- Manager: approver (full CRUD, implies User) -->
+        <record id="group_workforce_manager" model="res.groups">
+            <field name="name">Manager</field>
+            <field name="category_id" ref="module_category_workforce_timesheet"/>
+            <field name="implied_ids" eval="[(4, ref('group_workforce_user'))]"/>
+        </record>
+    </data>
+</odoo>

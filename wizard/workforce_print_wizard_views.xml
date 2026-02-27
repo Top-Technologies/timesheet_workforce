@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="workforce_print_wizard_form_view" model="ir.ui.view">
+        <field name="name">workforce.print.wizard.form</field>
+        <field name="model">workforce.print.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Print Payslip">
+                <group>
+                    <field name="entry_id" invisible="1"/>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                </group>
+                <group string="Preview" invisible="preview_count == 0">
+                    <field name="preview_count" string="Work Lines Found"/>
+                    <field name="preview_total" string="Total Amount"/>
+                </group>
+                <field name="preview_line_ids" invisible="preview_count == 0"
+                       readonly="1">
+                    <list>
+                        <field name="date"/>
+                        <field name="unit"/>
+                        <field name="unit_hours"/>
+                        <field name="unit_price"/>
+                        <field name="amount" sum="Total"/>
+                    </list>
+                </field>
+                <div invisible="preview_count != 0" class="text-muted text-center p-3">
+                    <em>Select a date range to preview work lines.</em>
+                </div>
+                <footer>
+                    <button name="action_print" type="object"
+                            string="Print" class="oe_highlight"
+                            icon="fa-print"
+                            invisible="preview_count == 0"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

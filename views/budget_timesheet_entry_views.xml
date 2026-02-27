@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- ═══════════════ ENTRY FORM VIEW (Worker Card) ═══════════════ -->
+    <record id="budget_timesheet_entry_form_view" model="ir.ui.view">
+        <field name="name">budget.timesheet.entry.form</field>
+        <field name="model">budget.timesheet.entry</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <!-- User: Submit for approval -->
+                    <button name="action_submit" type="object"
+                            string="Submit" class="oe_highlight"
+                            invisible="state != 'draft'"
+                            groups="timesheet_workforce.group_workforce_user"/>
+
+                    <!-- Manager: Approve / Refuse -->
+                    <button name="action_approve" type="object"
+                            string="Approve" class="oe_highlight"
+                            invisible="state != 'submitted'"
+                            groups="timesheet_workforce.group_workforce_manager"/>
+                    <button name="action_refuse" type="object"
+                            string="Refuse"
+                            invisible="state != 'submitted'"
+                            groups="timesheet_workforce.group_workforce_manager"/>
+
+                    <!-- Manager: Reset to Draft -->
+                    <button name="action_reset_draft" type="object"
+                            string="Reset to Draft"
+                            invisible="state != 'approved'"
+                            groups="timesheet_workforce.group_workforce_manager"/>
+
+
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,submitted,approved"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" icon="fa-clock-o"
+                                name="action_view_work_lines" type="object"
+                                invisible="line_count == 0">
+                            <field name="line_count" widget="statinfo" string="Work Days"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group col="2">
+                        <group string="Worker Details">
+                            <field name="partner_id"
+                                   options="{'no_create_edit': True}"
+                                   readonly="state != 'draft'"/>
+                            <field name="category_id"
+                                   options="{'no_create_edit': True}"
+                                   readonly="state != 'draft'"/>
+                        </group>
+                        <group string="Budget Link">
+                            <field name="budget_plan_line_id"
+                                   options="{'no_create': True}"
+                                   readonly="state != 'draft'"/>
+                            <field name="budget_plan_id"/>
+                            <field name="department_id"/>
+                        </group>
+                    </group>
+
+                    <group col="2">
+                        <group string="Summary">
+                            <field name="total_hours"/>
+                            <field name="total_amount"/>
+                        </group>
+                        <group>
+                            <field name="currency_id" groups="base.group_multi_currency"/>
+                            <field name="company_id" invisible="1"/>
+                        </group>
+                    </group>
+
+                    <!-- Hidden fields (stored, used in report) -->
+                    <field name="account_number" invisible="1"/>
+                    <field name="account_holder_name" invisible="1"/>
+                    <field name="worker_name" invisible="1"/>
+
+                    <notebook>
+                        <page string="Work Lines" name="work_lines">
+                            <field name="line_ids" readonly="state != 'draft'">
+                                <list editable="bottom">
+                                    <field name="date"/>
+                                    <field name="unit"/>
+                                    <field name="unit_hours" readonly="1"/>
+                                    <field name="unit_price"/>
+                                    <field name="amount" readonly="1" sum="Total"/>
+                                    <field name="notes"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="notes" placeholder="Additional notes..."
+                                   readonly="state != 'draft'"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ═══════════════ ENTRY LIST VIEW ═══════════════ -->
+    <record id="budget_timesheet_entry_list_view" model="ir.ui.view">
+        <field name="name">budget.timesheet.entry.list</field>
+        <field name="model">budget.timesheet.entry</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="state == 'draft'"
+                  decoration-info="state == 'submitted'"
+                  decoration-success="state == 'approved'">
+                <field name="name"/>
+                <field name="worker_name"/>
+                <field name="category_id"/>
+                <field name="line_count" string="Work Days"/>
+                <field name="total_hours"/>
+                <field name="total_amount" sum="Grand Total"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'submitted'"
+                       decoration-success="state == 'approved'"/>
+                <field name="budget_plan_line_id" optional="hide"/>
+                <field name="department_id" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ═══════════════ ENTRY SEARCH VIEW ═══════════════ -->
+    <record id="budget_timesheet_entry_search_view" model="ir.ui.view">
+        <field name="name">budget.timesheet.entry.search</field>
+        <field name="model">budget.timesheet.entry</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="partner_id" string="Worker"/>
+                <field name="category_id" string="Category"/>
+                <field name="budget_plan_line_id" string="Budget Item"/>
+                <field name="department_id" string="Department"/>
+                <separator/>
+                <filter name="filter_draft" string="Draft"
+                        domain="[('state', '=', 'draft')]"/>
+                <filter name="filter_submitted" string="Submitted"
+                        domain="[('state', '=', 'submitted')]"/>
+                <filter name="filter_approved" string="Approved"
+                        domain="[('state', '=', 'approved')]"/>
+                <separator/>
+                <group expand="1" string="Group By">
+                    <filter name="group_by_state" string="Status"
+                            context="{'group_by': 'state'}"/>
+                    <filter name="group_by_category" string="Category"
+                            context="{'group_by': 'category_id'}"/>
+                    <filter name="group_by_department" string="Department"
+                            context="{'group_by': 'department_id'}"/>
+                    <filter name="group_by_budget_plan" string="Budget Plan"
+                            context="{'group_by': 'budget_plan_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ═══════════════ WORK LINE LIST VIEW (standalone) ═══════════════ -->
+    <record id="budget_timesheet_entry_line_list_view" model="ir.ui.view">
+        <field name="name">budget.timesheet.entry.line.list</field>
+        <field name="model">budget.timesheet.entry.line</field>
+        <field name="arch" type="xml">
+            <list default_order="date desc">
+                <field name="date"/>
+                <field name="worker_name"/>
+                <field name="category_id"/>
+                <field name="unit"/>
+                <field name="unit_hours"/>
+                <field name="unit_price"/>
+                <field name="amount" sum="Total Amount"/>
+                <field name="department_id" optional="hide"/>
+                <field name="entry_id" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ═══════════════ WORK LINE SEARCH VIEW ═══════════════ -->
+    <record id="budget_timesheet_entry_line_search_view" model="ir.ui.view">
+        <field name="name">budget.timesheet.entry.line.search</field>
+        <field name="model">budget.timesheet.entry.line</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="worker_name" string="Worker"/>
+                <field name="category_id" string="Category"/>
+                <field name="department_id" string="Department"/>
+                <field name="date" string="Date"/>
+
+                <filter name="filter_today" string="Today"
+                        domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter name="filter_this_week" string="This Week"
+                        domain="[('date', '&gt;=', (context_today() - datetime.timedelta(days=context_today().weekday())).strftime('%Y-%m-%d')),
+                                 ('date', '&lt;=', (context_today() + datetime.timedelta(days=6 - context_today().weekday())).strftime('%Y-%m-%d'))]"/>
+                <filter name="filter_this_month" string="This Month"
+                        domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
+                <separator/>
+
+                <group expand="1" string="Group By">
+                    <filter name="group_by_date" string="Work Date"
+                            context="{'group_by': 'date:day'}"/>
+                    <filter name="group_by_week" string="Week"
+                            context="{'group_by': 'date:week'}"/>
+                    <filter name="group_by_month" string="Month"
+                            context="{'group_by': 'date:month'}"/>
+                    <filter name="group_by_worker" string="Worker"
+                            context="{'group_by': 'worker_name'}"/>
+                    <filter name="group_by_category" string="Category"
+                            context="{'group_by': 'category_id'}"/>
+                    <filter name="group_by_department" string="Department"
+                            context="{'group_by': 'department_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ═══════════════ ACTIONS ═══════════════ -->
+    <record id="budget_timesheet_entry_action" model="ir.actions.act_window">
+        <field name="name">Worker Cards</field>
+        <field name="res_model">budget.timesheet.entry</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="budget_timesheet_entry_search_view"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a worker card
+            </p>
+            <p>
+                Create one card per worker, add work lines, then submit for approval.
+            </p>
+        </field>
+    </record>
+
+    <record id="budget_timesheet_daily_summary_action" model="ir.actions.act_window">
+        <field name="name">Daily Payment Summary</field>
+        <field name="res_model">budget.timesheet.entry.line</field>
+        <field name="view_mode">list</field>
+        <field name="search_view_id" ref="budget_timesheet_entry_line_search_view"/>
+        <field name="context">{'search_default_group_by_date': 1}</field>
+    </record>
+
+    <!-- ═══════════════ SEQUENCE ═══════════════ -->
+    <record id="seq_budget_timesheet_entry" model="ir.sequence">
+        <field name="name">Workforce Timesheet Entry</field>
+        <field name="code">budget.timesheet.entry</field>
+        <field name="prefix">WTE/%(year)s/</field>
+        <field name="padding">4</field>
+    </record>
+</odoo>
