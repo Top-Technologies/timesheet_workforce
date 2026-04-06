@@ -7,7 +7,7 @@ _logger = logging.getLogger(__name__)
 
 class ReportWorkforcePayslip(models.AbstractModel):
     """Custom report parser for workforce payslip PDF."""
-    _name = 'report.budget_timesheet.report_workforce_payslip'
+    _name = 'report.timesheet_workforce.report_workforce_payslip'
     _description = 'Workforce Payslip Report'
 
     @api.model

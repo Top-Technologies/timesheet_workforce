@@ -5,8 +5,8 @@
         <field name="name">Workforce Payslip</field>
         <field name="model">budget.timesheet.entry</field>
         <field name="report_type">qweb-pdf</field>
-        <field name="report_name">budget_timesheet.report_workforce_payslip</field>
-        <field name="report_file">budget_timesheet.report_workforce_payslip</field>
+        <field name="report_name">timesheet_workforce.report_workforce_payslip</field>
+        <field name="report_file">timesheet_workforce.report_workforce_payslip</field>
     </record>
 
     <!-- ═══════════════ REPORT TEMPLATE ═══════════════ -->
@@ -179,8 +179,8 @@
         <field name="name">Weekly Payment Summary</field>
         <field name="model">budget.timesheet.weekly.summary</field>
         <field name="report_type">qweb-pdf</field>
-        <field name="report_name">budget_timesheet.report_weekly_summary</field>
-        <field name="report_file">budget_timesheet.report_weekly_summary</field>
+        <field name="report_name">timesheet_workforce.report_weekly_summary</field>
+        <field name="report_file">timesheet_workforce.report_weekly_summary</field>
     </record>
 
     <!-- ═══════════════ WEEKLY SUMMARY TEMPLATE ═══════════════ -->

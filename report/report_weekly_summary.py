@@ -7,7 +7,7 @@ _logger = logging.getLogger(__name__)
 
 class ReportWeeklySummary(models.AbstractModel):
     """Report parser for the consolidated weekly summary PDF."""
-    _name = 'report.budget_timesheet.report_weekly_summary'
+    _name = 'report.timesheet_workforce.report_weekly_summary'
     _description = 'Weekly Summary Report'
 
     @api.model
