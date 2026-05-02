@@ -180,7 +180,7 @@ class BudgetTimesheetEntry(models.Model):
                     'company_id': self.company_id.id,
                 })
 
-
+        return super().create(vals_list)
     # ── Workflow Actions ────────────────────────────────────────
     def action_submit(self):
         """User submits the card for manager approval."""

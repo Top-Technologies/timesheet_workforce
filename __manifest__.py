@@ -1,6 +1,7 @@
 {
     'name': 'Workforce Timesheet',
     'version': '18.0.1.3.2',
+    'version': '18.0.1.3.1',
     'summary': 'Track workforce time and payments linked to Budget Plan',
     'description': '''
         Track daily work hours for employees and contractors,
