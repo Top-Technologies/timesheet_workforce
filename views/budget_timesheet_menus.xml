@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- ═══════════════ MENUS (inside Timesheets app) ═══════════════ -->
+
+    <!-- Parent menu: Workforce Tracking -->
+    <menuitem
+        id="menu_workforce_tracking"
+        name="Workforce Tracking"
+        parent="hr_timesheet.timesheet_menu_root"
+        sequence="10"
+        groups="timesheet_workforce.group_workforce_user,timesheet_workforce.group_workforce_manager"
+    />
+
+    <!-- Worker Cards -->
+    <menuitem
+        id="menu_workforce_entries"
+        name="Worker Cards"
+        parent="menu_workforce_tracking"
+        action="budget_timesheet_entry_action"
+        sequence="10"
+    />
+
+    <!-- Weekly Summary -->
+    <menuitem
+        id="menu_workforce_weekly_summary"
+        name="Weekly Summary"
+        parent="menu_workforce_tracking"
+        action="budget_timesheet_weekly_summary_action"
+        sequence="15"
+    />
+
+    <!-- Daily Payment Summary -->
+    <menuitem
+        id="menu_workforce_daily_summary"
+        name="Daily Summary"
+        parent="menu_workforce_tracking"
+        action="budget_timesheet_daily_summary_action"
+        sequence="20"
+    />
+
+    <!-- Worker Categories -->
+    <menuitem
+        id="menu_workforce_categories"
+        name="Worker Categories"
+        parent="menu_workforce_tracking"
+        action="budget_timesheet_category_action"
+        sequence="40"
+        groups="timesheet_workforce.group_workforce_manager"
+    />
+</odoo>

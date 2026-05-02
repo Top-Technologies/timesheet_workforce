@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- ═══════════════ WEEKLY SUMMARY FORM VIEW ═══════════════ -->
+    <record id="budget_timesheet_weekly_summary_form_view" model="ir.ui.view">
+        <field name="name">budget.timesheet.weekly.summary.form</field>
+        <field name="model">budget.timesheet.weekly.summary</field>
+        <field name="arch" type="xml">
+            <form create="0" edit="0" delete="0">
+                <header>
+                    <button name="action_mark_on_the_way" type="object"
+                            string="Mark as On the Way" class="oe_highlight"
+                            invisible="state != 'unpaid'"
+                            groups="timesheet_workforce.group_workforce_manager"/>
+                    <button name="action_mark_paid" type="object"
+                            string="Mark as Paid" class="oe_highlight"
+                            invisible="state != 'on_the_way'"
+                            groups="timesheet_workforce.group_workforce_manager"/>
+                    <button name="action_mark_unpaid" type="object"
+                            string="Reset to Unpaid"
+                            invisible="state == 'unpaid'"
+                            groups="timesheet_workforce.group_workforce_manager"/>
+
+                    <button name="action_print_summary" type="object"
+                            string="Print Summary" icon="fa-print"
+                            class="oe_highlight"
+                            groups="timesheet_workforce.group_workforce_user"/>
+
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="unpaid,on_the_way,paid"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group col="2">
+                        <group string="Period">
+                            <field name="date_from" readonly="1"/>
+                            <field name="date_to" readonly="1"/>
+                            <field name="week_number" readonly="1"/>
+                        </group>
+                        <group string="Totals">
+                            <field name="worker_count" readonly="1"/>
+                            <field name="total_hours" readonly="1"/>
+                            <field name="total_amount" readonly="1"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="company_id" invisible="1"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Workers" name="workers">
+                            <field name="line_ids" readonly="1">
+                                <list create="0" delete="0" edit="0">
+                                    <field name="worker_name"/>
+                                    <field name="account_number"/>
+                                    <field name="category_id"/>
+                                    <field name="total_hours"/>
+                                    <field name="unit_price"/>
+                                    <field name="total_amount" sum="Grand Total"/>
+                                    <field name="entry_id" column_invisible="1"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ═══════════════ WEEKLY SUMMARY LIST VIEW ═══════════════ -->
+    <record id="budget_timesheet_weekly_summary_list_view" model="ir.ui.view">
+        <field name="name">budget.timesheet.weekly.summary.list</field>
+        <field name="model">budget.timesheet.weekly.summary</field>
+        <field name="arch" type="xml">
+            <list create="0" delete="0"
+                  decoration-danger="state == 'unpaid'"
+                  decoration-warning="state == 'on_the_way'"
+                  decoration-success="state == 'paid'">
+                <field name="name"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="worker_count" string="Workers"/>
+                <field name="total_hours"/>
+                <field name="total_amount" sum="Grand Total"/>
+                <field name="state" widget="badge"
+                       decoration-danger="state == 'unpaid'"
+                       decoration-warning="state == 'on_the_way'"
+                       decoration-success="state == 'paid'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ═══════════════ WEEKLY SUMMARY SEARCH VIEW ═══════════════ -->
+    <record id="budget_timesheet_weekly_summary_search_view" model="ir.ui.view">
+        <field name="name">budget.timesheet.weekly.summary.search</field>
+        <field name="model">budget.timesheet.weekly.summary</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="Week"/>
+                <separator/>
+                <filter name="filter_unpaid" string="Unpaid"
+                        domain="[('state', '=', 'unpaid')]"/>
+                <filter name="filter_on_the_way" string="On the Way"
+                        domain="[('state', '=', 'on_the_way')]"/>
+                <filter name="filter_paid" string="Paid"
+                        domain="[('state', '=', 'paid')]"/>
+                <separator/>
+                <group expand="1" string="Group By">
+                    <filter name="group_by_state" string="Status"
+                            context="{'group_by': 'state'}"/>
+                    <filter name="group_by_year" string="Year"
+                            context="{'group_by': 'year'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ═══════════════ WEEKLY SUMMARY ACTION ═══════════════ -->
+    <record id="budget_timesheet_weekly_summary_action" model="ir.actions.act_window">
+        <field name="name">Weekly Summary</field>
+        <field name="res_model">budget.timesheet.weekly.summary</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="budget_timesheet_weekly_summary_search_view"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No weekly summaries yet
+            </p>
+            <p>
+                Weekly summaries are auto-generated from approved worker cards.
+                Add work lines to worker cards and approve them to see summaries here.
+            </p>
+        </field>
+    </record>
+</odoo>

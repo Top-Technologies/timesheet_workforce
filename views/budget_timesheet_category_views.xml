@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- ═══════════════ CATEGORY FORM VIEW ═══════════════ -->
+    <record id="budget_timesheet_category_form_view" model="ir.ui.view">
+        <field name="name">budget.timesheet.category.form</field>
+        <field name="model">budget.timesheet.category</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="e.g. Carpenter"/>
+                        </h1>
+                    </div>
+                    <group col="2">
+                        <group>
+                            <field name="code" placeholder="e.g. CARP"/>
+                            <field name="unit_price"/>
+                            <field name="currency_id" groups="base.group_multi_currency"/>
+                        </group>
+                        <group>
+                            <field name="active" invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ═══════════════ CATEGORY LIST VIEW ═══════════════ -->
+    <record id="budget_timesheet_category_list_view" model="ir.ui.view">
+        <field name="name">budget.timesheet.category.list</field>
+        <field name="model">budget.timesheet.category</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="unit_price"/>
+                <field name="currency_id" groups="base.group_multi_currency" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ═══════════════ CATEGORY ACTION ═══════════════ -->
+    <record id="budget_timesheet_category_action" model="ir.actions.act_window">
+        <field name="name">Worker Categories</field>
+        <field name="res_model">budget.timesheet.category</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first worker category
+            </p>
+            <p>
+                Define worker categories (Carpenter, Plumber, etc.) with their unit prices.
+            </p>
+        </field>
+    </record>
+</odoo>

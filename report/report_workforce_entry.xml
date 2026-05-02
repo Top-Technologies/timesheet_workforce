@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- ═══════════════ REPORT ACTION ═══════════════ -->
+    <record id="action_report_workforce_payslip" model="ir.actions.report">
+        <field name="name">Workforce Payslip</field>
+        <field name="model">budget.timesheet.entry</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">timesheet_workforce.report_workforce_payslip</field>
+        <field name="report_file">timesheet_workforce.report_workforce_payslip</field>
+    </record>
+
+    <!-- ═══════════════ REPORT TEMPLATE ═══════════════ -->
+    <template id="report_workforce_payslip">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.internal_layout">
+                    <div class="page" style="font-family: Arial, sans-serif; font-size: 12px; padding: 20px;">
+
+                        <!-- Company info header -->
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <h2 style="margin: 0;">Workforce Payment Summary</h2>
+                            <p style="color: #666; margin: 5px 0;">
+                                <span t-esc="res_company.name"/>
+                            </p>
+                        </div>
+
+                        <!-- Reference and date row -->
+                        <table style="width: 100%; margin-bottom: 15px;">
+                            <tr>
+                                <td style="width: 50%;">
+                                    <strong>Reference:</strong>
+                                    <span t-field="doc.name"/>
+                                </td>
+                                <td style="width: 50%; text-align: right;">
+                                    <strong>Print Date:</strong>
+                                    <span t-esc="datetime.datetime.now().strftime('%d/%m/%Y')"/>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Period -->
+                        <t t-if="data and data.get('date_from')">
+                            <table style="width: 100%; margin-bottom: 10px;">
+                                <tr>
+                                    <td>
+                                        <strong>Period:</strong>
+                                        <span t-esc="data.get('date_from')"/>
+                                        <span> – </span>
+                                        <span t-esc="data.get('date_to')"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </t>
+
+                        <!-- Worker info -->
+                        <table style="width: 100%; margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
+                            <tr>
+                                <td style="width: 33%;">
+                                    <strong>Worker:</strong>
+                                    <span t-esc="doc.partner_id.name or '-'"/>
+                                </td>
+                                <td style="width: 33%;">
+                                    <strong>Account:</strong>
+                                    <span t-esc="doc.account_number or '-'"/>
+                                </td>
+                                <td style="width: 34%;">
+                                    <strong>Category:</strong>
+                                    <span t-esc="doc.category_id.name or '-'"/>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Get filtered data for this doc -->
+                        <t t-set="entry_data" t-value="filtered_data.get(doc.id, {})"/>
+                        <t t-set="lines" t-value="entry_data.get('lines', doc.line_ids)"/>
+                        <t t-set="f_hours" t-value="entry_data.get('total_hours', doc.total_hours)"/>
+                        <t t-set="f_amount" t-value="entry_data.get('total_amount', doc.total_amount)"/>
+
+                        <!-- Summary table -->
+                        <h4 style="margin-bottom: 8px;">Payment Summary</h4>
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                            <thead>
+                                <tr style="background-color: #e9ecef;">
+                                    <th style="border: 1px solid #ccc; padding: 6px;">Name</th>
+                                    <th style="border: 1px solid #ccc; padding: 6px;">Account Number</th>
+                                    <th style="border: 1px solid #ccc; padding: 6px;">Description</th>
+                                    <th style="border: 1px solid #ccc; padding: 6px; text-align: right;">Total Hours</th>
+                                    <th style="border: 1px solid #ccc; padding: 6px; text-align: right;">Total Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="border: 1px solid #ccc; padding: 6px;">
+                                        <span t-esc="doc.partner_id.name or '-'"/>
+                                    </td>
+                                    <td style="border: 1px solid #ccc; padding: 6px;">
+                                        <span t-esc="doc.account_number or '-'"/>
+                                    </td>
+                                    <td style="border: 1px solid #ccc; padding: 6px;">
+                                        <span t-esc="doc.category_id.name or ''"/>
+                                    </td>
+                                    <td style="border: 1px solid #ccc; padding: 6px; text-align: right;">
+                                        <span t-esc="'%.1f' % f_hours"/>
+                                    </td>
+                                    <td style="border: 1px solid #ccc; padding: 6px; text-align: right;">
+                                        <span t-esc="'%.2f' % f_amount"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Work line detail breakdown -->
+                        <h4 style="margin-bottom: 8px;">Work Line Details</h4>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background-color: #e9ecef;">
+                                    <th style="border: 1px solid #ccc; padding: 6px;">#</th>
+                                    <th style="border: 1px solid #ccc; padding: 6px;">Date</th>
+                                    <th style="border: 1px solid #ccc; padding: 6px;">Unit</th>
+                                    <th style="border: 1px solid #ccc; padding: 6px; text-align: right;">Hours</th>
+                                    <th style="border: 1px solid #ccc; padding: 6px; text-align: right;">Unit Price</th>
+                                    <th style="border: 1px solid #ccc; padding: 6px; text-align: right;">Amount</th>
+                                    <th style="border: 1px solid #ccc; padding: 6px;">Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="counter" t-value="0"/>
+                                <t t-foreach="lines" t-as="line">
+                                    <t t-set="counter" t-value="counter + 1"/>
+                                    <tr>
+                                        <td style="border: 1px solid #ccc; padding: 6px;">
+                                            <span t-esc="counter"/>
+                                        </td>
+                                        <td style="border: 1px solid #ccc; padding: 6px;">
+                                            <span t-esc="str(line.date)"/>
+                                        </td>
+                                        <td style="border: 1px solid #ccc; padding: 6px;">
+                                            <t t-if="line.unit == 'full_day'">Full Day</t>
+                                            <t t-else="">Half Day</t>
+                                        </td>
+                                        <td style="border: 1px solid #ccc; padding: 6px; text-align: right;">
+                                            <span t-esc="'%.1f' % line.unit_hours"/>
+                                        </td>
+                                        <td style="border: 1px solid #ccc; padding: 6px; text-align: right;">
+                                            <span t-esc="'%.2f' % line.unit_price"/>
+                                        </td>
+                                        <td style="border: 1px solid #ccc; padding: 6px; text-align: right;">
+                                            <span t-esc="'%.2f' % line.amount"/>
+                                        </td>
+                                        <td style="border: 1px solid #ccc; padding: 6px;">
+                                            <span t-esc="line.notes or ''"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            <tfoot>
+                                <tr style="font-weight: bold; background-color: #f8f9fa;">
+                                    <td colspan="3" style="border: 1px solid #ccc; padding: 6px;">Grand Total</td>
+                                    <td style="border: 1px solid #ccc; padding: 6px; text-align: right;">
+                                        <span t-esc="'%.1f' % f_hours"/>
+                                    </td>
+                                    <td style="border: 1px solid #ccc; padding: 6px;"/>
+                                    <td style="border: 1px solid #ccc; padding: 6px; text-align: right;">
+                                        <span t-esc="'%.2f' % f_amount"/>
+                                    </td>
+                                    <td style="border: 1px solid #ccc; padding: 6px;"/>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- ═══════════════ WEEKLY SUMMARY REPORT ACTION ═══════════════ -->
+    <record id="action_report_weekly_summary" model="ir.actions.report">
+        <field name="name">Weekly Payment Summary</field>
+        <field name="model">budget.timesheet.weekly.summary</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">timesheet_workforce.report_weekly_summary</field>
+        <field name="report_file">timesheet_workforce.report_weekly_summary</field>
+    </record>
+
+    <!-- ═══════════════ WEEKLY SUMMARY TEMPLATE ═══════════════ -->
+    <template id="report_weekly_summary">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page" style="font-family: Arial, sans-serif; font-size: 11px; padding: 15px;">
+
+                        <!-- Header -->
+                        <div style="text-align: center; margin-bottom: 15px;">
+                            <h2 style="margin: 0;">Weekly Payment Summary</h2>
+                        </div>
+
+                        <!-- Period and Print date -->
+                        <table style="width: 100%; margin-bottom: 12px;">
+                            <tr>
+                                <td style="width: 50%;">
+                                    <strong><span t-esc="doc.name"/></strong>
+                                </td>
+                                <td style="width: 50%; text-align: right;">
+                                    <strong>Print Date:</strong>
+                                    <span t-esc="datetime.datetime.now().strftime('%d/%m/%Y')"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <strong>Period:</strong>
+                                    <span t-esc="str(doc.date_from)"/> – <span t-esc="str(doc.date_to)"/>
+                                </td>
+                                <td style="text-align: right;">
+                                    <strong>Status:</strong>
+                                    <t t-if="doc.state == 'unpaid'"><span style="color: #dc3545; font-weight: bold;">Unpaid</span></t>
+                                    <t t-elif="doc.state == 'on_the_way'"><span style="color: #ffc107; font-weight: bold;">On the Way</span></t>
+                                    <t t-else=""><span style="color: #28a745; font-weight: bold;">Paid</span></t>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Workers table -->
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background-color: #343a40; color: white;">
+                                    <th style="border: 1px solid #ccc; padding: 6px; text-align: center;">#</th>
+                                    <th style="border: 1px solid #ccc; padding: 6px;">Worker Name</th>
+                                    <th style="border: 1px solid #ccc; padding: 6px;">Account Number</th>
+                                    <th style="border: 1px solid #ccc; padding: 6px;">Category</th>
+                                    <th style="border: 1px solid #ccc; padding: 6px; text-align: right;">Hours</th>
+                                    <th style="border: 1px solid #ccc; padding: 6px; text-align: right;">Unit Price</th>
+                                    <th style="border: 1px solid #ccc; padding: 6px; text-align: right;">Total</th>
+                                    <th style="border: 1px solid #ccc; padding: 6px; text-align: center; width: 100px;">Signature</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="row_num" t-value="0"/>
+                                <t t-set="grand_hours" t-value="0"/>
+                                <t t-set="grand_total" t-value="0"/>
+                                <t t-foreach="doc.line_ids" t-as="line">
+                                    <t t-set="row_num" t-value="row_num + 1"/>
+                                    <t t-set="grand_hours" t-value="grand_hours + line.total_hours"/>
+                                    <t t-set="grand_total" t-value="grand_total + line.total_amount"/>
+                                    <tr>
+                                        <td style="border: 1px solid #ccc; padding: 5px; text-align: center;">
+                                            <span t-esc="row_num"/>
+                                        </td>
+                                        <td style="border: 1px solid #ccc; padding: 5px;">
+                                            <span t-esc="line.worker_name or '-'"/>
+                                        </td>
+                                        <td style="border: 1px solid #ccc; padding: 5px;">
+                                            <span t-esc="line.account_number or '-'"/>
+                                        </td>
+                                        <td style="border: 1px solid #ccc; padding: 5px;">
+                                            <span t-esc="line.category_id.name or '-'"/>
+                                        </td>
+                                        <td style="border: 1px solid #ccc; padding: 5px; text-align: right;">
+                                            <span t-esc="'%.1f' % line.total_hours"/>
+                                        </td>
+                                        <td style="border: 1px solid #ccc; padding: 5px; text-align: right;">
+                                            <span t-esc="'%.2f' % line.unit_price"/>
+                                        </td>
+                                        <td style="border: 1px solid #ccc; padding: 5px; text-align: right;">
+                                            <span t-esc="'%.2f' % line.total_amount"/>
+                                        </td>
+                                        <td style="border: 1px solid #ccc; padding: 5px; height: 30px;">
+                                            <!-- blank space for manual signature -->
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            <tfoot>
+                                <tr style="font-weight: bold; background-color: #e9ecef;">
+                                    <td colspan="4" style="border: 1px solid #ccc; padding: 6px;">
+                                        Grand Total (<span t-esc="len(doc.line_ids)"/> workers)
+                                    </td>
+                                    <td style="border: 1px solid #ccc; padding: 6px; text-align: right;">
+                                        <span t-esc="'%.1f' % grand_hours"/>
+                                    </td>
+                                    <td style="border: 1px solid #ccc; padding: 6px;"/>
+                                    <td style="border: 1px solid #ccc; padding: 6px; text-align: right;">
+                                        <span t-esc="'%.2f' % grand_total"/>
+                                    </td>
+                                    <td style="border: 1px solid #ccc; padding: 6px;"/>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                        <!-- ═══ Approval Signature Blocks ═══ -->
+                        <table style="width: 100%; margin-top: 40px; border-collapse: collapse;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 33%; padding: 6px;"/>
+                                    <th style="width: 33%; text-align: center; padding: 6px; font-size: 10px; color: #666;">Name</th>
+                                    <th style="width: 17%; text-align: center; padding: 6px; font-size: 10px; color: #666;">Signature</th>
+                                    <th style="width: 17%; text-align: center; padding: 6px; font-size: 10px; color: #666;">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Prepared By -->
+                                <tr>
+                                    <td style="padding: 8px 6px; font-weight: bold; vertical-align: bottom;">Prepared by:</td>
+                                    <td style="border-bottom: 1px solid #333; padding: 8px 6px; height: 35px;"/>
+                                    <td style="border-bottom: 1px solid #333; padding: 8px 6px; height: 35px;"/>
+                                    <td style="border-bottom: 1px solid #333; padding: 8px 6px; height: 35px;"/>
+                                </tr>
+                                <!-- Spacer -->
+                                <tr><td colspan="4" style="height: 20px;"/></tr>
+                                <!-- Approved By -->
+                                <tr>
+                                    <td style="padding: 8px 6px; font-weight: bold; vertical-align: bottom;">Approved by:</td>
+                                    <td style="border-bottom: 1px solid #333; padding: 8px 6px; height: 35px;"/>
+                                    <td style="border-bottom: 1px solid #333; padding: 8px 6px; height: 35px;"/>
+                                    <td style="border-bottom: 1px solid #333; padding: 8px 6px; height: 35px;"/>
+                                </tr>
+                                <!-- Spacer -->
+                                <tr><td colspan="4" style="height: 20px;"/></tr>
+                                <!-- Authorized By -->
+                                <tr>
+                                    <td style="padding: 8px 6px; font-weight: bold; vertical-align: bottom;">Authorized by:</td>
+                                    <td style="border-bottom: 1px solid #333; padding: 8px 6px; height: 35px;"/>
+                                    <td style="border-bottom: 1px solid #333; padding: 8px 6px; height: 35px;"/>
+                                    <td style="border-bottom: 1px solid #333; padding: 8px 6px; height: 35px;"/>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>
