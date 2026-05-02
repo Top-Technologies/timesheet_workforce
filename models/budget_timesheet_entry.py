@@ -135,10 +135,12 @@ class BudgetTimesheetEntry(models.Model):
     def write(self, vals):
         res = super().write(vals)
         # If account_number or account_holder_name changed, sync to partner
-        if 'account_number' in vals or 'account_holder_name' in vals:
-            for rec in self:
-                if rec.partner_id and rec.account_number:
-                    rec._sync_account_to_partner()
+        # skip_bank_sync flag prevents circular calls from res.partner.bank sync
+        if not self.env.context.get('skip_bank_sync'):
+            if 'account_number' in vals or 'account_holder_name' in vals:
+                for rec in self:
+                    if rec.partner_id and rec.account_number:
+                        rec._sync_account_to_partner()
         return res
 
     def _sync_account_to_partner(self):
@@ -147,7 +149,7 @@ class BudgetTimesheetEntry(models.Model):
         if not self.partner_id or not self.account_number:
             return
 
-        PartnerBank = self.env['res.partner.bank']
+        PartnerBank = self.env['res.partner.bank'].with_context(skip_worker_card_sync=True)
         # Look for an existing bank account with the same number on this partner
         existing = PartnerBank.search([
             ('partner_id', '=', self.partner_id.id),
@@ -180,7 +182,6 @@ class BudgetTimesheetEntry(models.Model):
                     'company_id': self.company_id.id,
                 })
 
-        return super().create(vals_list)
     # ── Workflow Actions ────────────────────────────────────────
     def action_submit(self):
         """User submits the card for manager approval."""

@@ -16,24 +16,24 @@ class ResPartnerBank(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         records = super().create(vals_list)
-        for bank in records:
-            if bank.partner_id:
-                bank._sync_to_worker_cards()
+        if not self.env.context.get('skip_worker_card_sync'):
+            for bank in records:
+                if bank.partner_id:
+                    bank._sync_to_worker_cards()
         return records
 
     def write(self, vals):
         res = super().write(vals)
-        # If the account number or holder name changed, push to worker cards
-        if 'acc_number' in vals or 'acc_holder_name' in vals:
-            for bank in self:
-                if bank.partner_id:
-                    bank._sync_to_worker_cards()
+        if not self.env.context.get('skip_worker_card_sync'):
+            if 'acc_number' in vals or 'acc_holder_name' in vals:
+                for bank in self:
+                    if bank.partner_id:
+                        bank._sync_to_worker_cards()
         return res
 
     def _sync_to_worker_cards(self):
         """Push this bank account's details to all worker cards
-        belonging to the same partner that currently have no
-        account number (or have the old one)."""
+        belonging to the same partner."""
         self.ensure_one()
         if not self.partner_id:
             return
@@ -46,10 +46,7 @@ class ResPartnerBank(models.Model):
         if not entries:
             return
 
-        # Update worker cards that have no bank account, or whose
-        # account number differs from this (latest) bank account.
-        # We use the first bank account on the contact (sorted by id)
-        # to stay consistent with the onchange logic.
+        # Use the first bank account on the contact (consistent with onchange)
         first_bank = self.env['res.partner.bank'].search([
             ('partner_id', '=', self.partner_id.id),
         ], limit=1, order='id asc')
@@ -59,7 +56,8 @@ class ResPartnerBank(models.Model):
 
         for entry in entries:
             if entry.account_number != first_bank.acc_number:
-                entry.write({
+                # Use skip_bank_sync context flag to prevent circular calls
+                entry.with_context(skip_bank_sync=True).write({
                     'account_number': first_bank.acc_number,
                     'account_holder_name': (
                         first_bank.acc_holder_name
