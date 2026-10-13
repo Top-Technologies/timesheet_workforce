@@ -1,7 +1,6 @@
 {
     'name': 'Workforce Timesheet',
-    'version': '18.0.1.3.2',
-    'version': '18.0.1.3.1',
+    'version': '18.0.1.5.0',
     'summary': 'Track workforce time and payments linked to Budget Plan',
     'description': '''
         Track daily work hours for employees and contractors,
@@ -11,7 +10,7 @@
     'category': 'Services/Timesheets',
     'author': 'Top Tech',
     'license': 'LGPL-3',
-    'depends': ['hr_timesheet', 'budget_plan', 'hr'],
+    'depends': ['hr_timesheet', 'budget_plan', 'hr', 'purchase'],
     'data': [
         'security/budget_timesheet_groups.xml',
         'security/ir.model.access.csv',
@@ -20,6 +19,7 @@
         'views/budget_timesheet_category_views.xml',
         'views/budget_timesheet_entry_views.xml',
         'views/budget_timesheet_weekly_summary_views.xml',
+        'views/purchase_order_views.xml',
         'views/budget_timesheet_menus.xml',
     ],
     'installable': True,

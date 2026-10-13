@@ -15,6 +15,14 @@
                             string="Mark as Paid" class="oe_highlight"
                             invisible="state != 'on_the_way'"
                             groups="timesheet_workforce.group_workforce_manager"/>
+                    <button name="action_mark_paid" type="object"
+                            string="Mark as Paid"
+                            invisible="state != 'unpaid'"
+                            groups="timesheet_workforce.group_workforce_manager"/>
+                    <button name="action_create_rfq" type="object"
+                            string="Create RFQ" class="oe_highlight"
+                            invisible="state != 'paid' or not has_pending_rfq"
+                            groups="timesheet_workforce.group_workforce_manager"/>
                     <button name="action_mark_unpaid" type="object"
                             string="Reset to Unpaid"
                             invisible="state == 'unpaid'"
@@ -29,6 +37,14 @@
                            statusbar_visible="unpaid,on_the_way,paid"/>
                 </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object"
+                                name="action_view_purchase_orders"
+                                icon="fa-shopping-cart"
+                                invisible="purchase_order_count == 0">
+                            <field name="purchase_order_count" widget="statinfo" string="RFQs"/>
+                        </button>
+                    </div>
                     <div class="oe_title">
                         <h1>
                             <field name="name" readonly="1"/>
@@ -46,6 +62,8 @@
                             <field name="total_amount" readonly="1"/>
                             <field name="currency_id" invisible="1"/>
                             <field name="company_id" invisible="1"/>
+                            <field name="purchase_order_count" invisible="1"/>
+                            <field name="has_pending_rfq" invisible="1"/>
                         </group>
                     </group>
 
@@ -56,6 +74,8 @@
                                     <field name="worker_name"/>
                                     <field name="account_number"/>
                                     <field name="category_id"/>
+                                    <field name="budget_plan_id" optional="show"/>
+                                    <field name="budget_plan_line_id" optional="show"/>
                                     <field name="total_hours"/>
                                     <field name="unit_price"/>
                                     <field name="total_amount" sum="Grand Total"/>
@@ -86,6 +106,7 @@
                 <field name="worker_count" string="Workers"/>
                 <field name="total_hours"/>
                 <field name="total_amount" sum="Grand Total"/>
+                <field name="purchase_order_count" string="RFQs" optional="show"/>
                 <field name="state" widget="badge"
                        decoration-danger="state == 'unpaid'"
                        decoration-warning="state == 'on_the_way'"

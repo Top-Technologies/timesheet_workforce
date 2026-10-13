@@ -50,9 +50,33 @@ class BudgetTimesheetWeeklySummaryLine(models.Model):
         store=True,
     )
 
+    partner_id = fields.Many2one(
+        related='entry_id.partner_id',
+        string="Worker Contact",
+        store=True,
+        readonly=True,
+    )
+    budget_plan_line_id = fields.Many2one(
+        related='entry_id.budget_plan_line_id',
+        string="Budget Plan Item",
+        store=True,
+        readonly=True,
+    )
+    budget_plan_id = fields.Many2one(
+        related='entry_id.budget_plan_id',
+        string="Budget Plan",
+        store=True,
+        readonly=True,
+    )
+
     # Aggregated values (set by the refresh action)
     total_hours = fields.Float(string="Total Hours")
     total_amount = fields.Monetary(
         string="Total Amount",
         currency_field='currency_id',
+    )
+    purchase_order_line_ids = fields.One2many(
+        'purchase.order.line',
+        'weekly_summary_line_id',
+        string="Purchase Order Lines",
     )

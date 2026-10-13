@@ -28,6 +28,12 @@ class BudgetTimesheetCategory(models.Model):
         default=lambda self: self.env.company.currency_id.id,
         required=True,
     )
+    product_id = fields.Many2one(
+        'product.product',
+        string="Linked Service Product",
+        domain="[('type', '=', 'service'), ('purchase_ok', '=', True)]",
+        help="Default service product used when generating purchase orders for this category.",
+    )
     active = fields.Boolean(string="Active", default=True)
 
     _sql_constraints = [

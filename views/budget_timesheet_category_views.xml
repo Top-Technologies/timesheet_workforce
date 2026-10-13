@@ -16,6 +16,7 @@
                         <group>
                             <field name="code" placeholder="e.g. CARP"/>
                             <field name="unit_price"/>
+                            <field name="product_id" options="{'no_create_edit': True}"/>
                             <field name="currency_id" groups="base.group_multi_currency"/>
                         </group>
                         <group>
@@ -36,6 +37,7 @@
                 <field name="name"/>
                 <field name="code"/>
                 <field name="unit_price"/>
+                <field name="product_id" optional="show"/>
                 <field name="currency_id" groups="base.group_multi_currency" optional="hide"/>
             </list>
         </field>

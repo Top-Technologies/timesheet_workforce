@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="purchase_order_form_inherit_workforce" model="ir.ui.view">
+        <field name="name">purchase.order.form.inherit.workforce</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Add Budget Plan in PO header -->
+            <xpath expr="//field[@name='partner_ref']" position="after">
+                <field name="budget_plan_id" readonly="1" invisible="not budget_plan_id"/>
+                <field name="budget_plan_count" invisible="1"/>
+                <field name="budget_plan_ids" widget="many2many_tags" readonly="1"
+                       invisible="budget_plan_count &lt;= 1"/>
+            </xpath>
+
+            <!-- Add weekly summary link in Other Info -->
+            <xpath expr="//field[@name='origin']" position="after">
+                <field name="weekly_summary_id" readonly="1" invisible="not weekly_summary_id"/>
+            </xpath>
+
+            <!-- Add worker, category, budget plan, and budget item columns to order lines -->
+            <xpath expr="//field[@name='order_line']/list/field[@name='name']" position="after">
+                <field name="worker_partner_id" optional="show"/>
+                <field name="worker_category_id" optional="show"/>
+                <field name="budget_plan_id" optional="show"/>
+                <field name="budget_plan_line_id" string="Budget Plan Item" optional="show"
+                       domain="[('budget_plan_id', '=?', budget_plan_id)]"/>
+            </xpath>
+
+            <!-- Add fields to order lines form popup -->
+            <xpath expr="//field[@name='order_line']/form//field[@name='product_id']" position="after">
+                <field name="worker_partner_id" readonly="1" invisible="not worker_partner_id"/>
+                <field name="worker_category_id" readonly="1" invisible="not worker_category_id"/>
+                <field name="budget_plan_id" readonly="1" invisible="not budget_plan_id"/>
+                <field name="budget_plan_line_id" string="Budget Plan Item" readonly="1" invisible="not budget_plan_line_id"/>
+            </xpath>
+
+            <!-- Enhance Budget Plan Item page if present -->
+            <xpath expr="//page[field[@name='budget_plan_line_ids']]" position="attributes">
+                <attribute name="string">Budget Plan &amp; Item</attribute>
+            </xpath>
+            <xpath expr="//field[@name='budget_plan_line_ids']" position="before">
+                <group>
+                    <field name="budget_plan_id" readonly="1" invisible="not budget_plan_id"/>
+                    <field name="budget_plan_ids" widget="many2many_tags" readonly="1"
+                           invisible="budget_plan_count &lt;= 1"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Search View: filter & group by Budget Plan and Weekly Summary -->
+    <record id="purchase_order_view_search_inherit_workforce" model="ir.ui.view">
+        <field name="name">purchase.order.select.inherit.workforce</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="budget_plan_id"/>
+                <field name="weekly_summary_id"/>
+            </xpath>
+            <xpath expr="//filter[@name='order_date']" position="after">
+                <filter string="Budget Plan" name="group_by_budget_plan" domain="[]" context="{'group_by': 'budget_plan_id'}"/>
+                <filter string="Weekly Summary" name="group_by_weekly_summary" domain="[]" context="{'group_by': 'weekly_summary_id'}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
